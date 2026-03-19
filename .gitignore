@@ -1,0 +1,18 @@
+# Secrets — nunca a git
+.env
+
+# Namespaces — se generan localmente con init.py
+namespaces/
+
+# Estado local
+logs/
+memory/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+dist/
+*.egg-info/
+.pytest_cache/

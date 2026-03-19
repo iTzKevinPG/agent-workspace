@@ -1,0 +1,75 @@
+# Preguntas que hace run/init.py al crear un namespace nuevo.
+# Puedes agregar, quitar o reordenar preguntas aquí.
+
+questions:
+
+  - key: name
+    prompt: "Nombre del namespace (slug, sin espacios ni mayúsculas)"
+    type: text
+    required: true
+    example: "ecommerce-web"
+
+  - key: description
+    prompt: "Descripción corta del dominio"
+    type: text
+    required: true
+    example: "Ecommerces y landing pages en Next.js + NestJS"
+
+  - key: projects_path
+    prompt: "Ruta absoluta a la carpeta que contiene los proyectos de este namespace"
+    type: path
+    validate: exists
+    example: "/home/user/dev/ecommerce"
+
+  - key: stack
+    prompt: "Stack principal (separado por comas)"
+    type: list
+    example: "Next.js 14, NestJS, PostgreSQL, TailwindCSS, TypeScript"
+
+  - key: methodology
+    prompt: "Metodología de trabajo"
+    type: choice
+    options:
+      - value: scrum
+        label: "Scrum (sprints, backlog)"
+      - value: kanban
+        label: "Kanban (flujo continuo)"
+      - value: libre
+        label: "Libre / sin metodología formal"
+
+  - key: branching
+    prompt: "Estrategia de branching"
+    type: choice
+    options:
+      - value: gitflow
+        label: "Gitflow (main, develop, feature/*)"
+      - value: trunk
+        label: "Trunk-based (ramas cortas, merge frecuente)"
+      - value: feature
+        label: "Feature branches simples"
+
+  - key: commits
+    prompt: "Convención de commits"
+    type: choice
+    options:
+      - value: conventional
+        label: "Conventional Commits (feat:, fix:, chore:...)"
+      - value: libre
+        label: "Libre"
+
+  - key: agents
+    prompt: "Agentes a activar en este namespace"
+    type: multiselect
+    options: [architect, backend, frontend, qa, devops]
+    default: [architect, backend, frontend, qa]
+
+  - key: main_restrictions
+    prompt: "Restricciones importantes que los agentes deben respetar"
+    type: text
+    hint: "Se agrega automáticamente a rules.md. Ej: no push a main, no borrar archivos sin confirmar"
+    required: false
+
+  - key: extra_context
+    prompt: "¿Algo más que los agentes deban saber sobre este entorno? (opcional)"
+    type: text
+    required: false

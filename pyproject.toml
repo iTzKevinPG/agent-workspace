@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "agent-workspace"
+version = "1.0.0"
+description = "Multi-agent orchestrator — namespace-based, filesystem-only"
+requires-python = ">=3.11"
+dependencies = [
+    "crewai>=0.80.0",
+    "anthropic>=0.40.0",
+    "python-dotenv>=1.0.0",
+    "pyyaml>=6.0",
+    "rich>=13.0.0",
+    "questionary>=2.0.0",
+    "watchdog>=4.0.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["core*", "agents*", "tools*", "dashboard*", "run*"]
