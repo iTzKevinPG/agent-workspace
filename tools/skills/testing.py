@@ -16,7 +16,7 @@ class TestingSkill:
 
     def detect_test_runner(self, project_root: str | Path) -> str | None:
         """
-        Detecta qué test runner usa el proyecto mirando package.json y pyproject.toml.
+        Detecta que test runner usa el proyecto mirando package.json y pyproject.toml.
         Retorna el nombre del runner o None si no se detecta.
         """
         root = Path(project_root)
@@ -64,7 +64,7 @@ class TestingSkill:
         runner = self.detect_test_runner(root)
 
         if not runner:
-            return {"success": False, "output": "No se detectó test runner.", "runner": "none"}
+            return {"success": False, "output": "No se detecto test runner.", "runner": "none"}
 
         cmd_map = {
             "pytest":  ["pytest", "--tb=short", "-q"],
@@ -73,7 +73,7 @@ class TestingSkill:
         }
         cmd = cmd_map.get(runner, [runner])
 
-        # Verificar que el ejecutable esté disponible
+        # Verificar que el ejecutable este disponible
         if not shutil.which(cmd[0]):
             return {
                 "success": False,
@@ -115,12 +115,12 @@ class TestingSkill:
         if coverage_xml.exists():
             try:
                 text = coverage_xml.read_text(encoding="utf-8")
-                # Extraer línea de resumen
+                # Extraer linea de resumen
                 import re
                 match = re.search(r'line-rate="([^"]+)"', text)
                 if match:
                     rate = float(match.group(1)) * 100
-                    return f"Cobertura de líneas: {rate:.1f}% (fuente: coverage.xml)"
+                    return f"Cobertura de lineas: {rate:.1f}% (fuente: coverage.xml)"
             except OSError:
                 pass
 
@@ -148,7 +148,7 @@ class TestingSkill:
             return f"Reporte LCOV disponible en: {lcov}"
 
         return (
-            "No se encontró reporte de cobertura.\n"
+            "No se encontro reporte de cobertura.\n"
             "Para Python: ejecuta 'pytest --cov=. --cov-report=xml'\n"
             "Para Jest:   ejecuta 'jest --coverage'\n"
             "Para Vitest: ejecuta 'vitest run --coverage'"

@@ -1,5 +1,5 @@
 """
-MCP de Fetch: obtener contenido de URLs y documentación de librerías.
+MCP de Fetch: obtener contenido de URLs y documentacion de librerias.
 Usa solo urllib de stdlib — sin dependencias externas.
 """
 from __future__ import annotations
@@ -15,7 +15,7 @@ from pydantic import BaseModel, Field
 _USER_AGENT = "agent-workspace/1.0"
 _TIMEOUT = 15
 
-# Mapa de librerías a su URL de documentación oficial
+# Mapa de librerias a su URL de documentacion oficial
 _DOCS_MAP: dict[str, str] = {
     "nestjs":        "https://docs.nestjs.com",
     "nest":          "https://docs.nestjs.com",
@@ -99,10 +99,10 @@ def _fetch_text(url: str, max_chars: int = 6000) -> str:
 
 class FetchURLInput(BaseModel):
     url: str = Field(description="URL a obtener")
-    max_chars: int = Field(default=6000, description="Máximo de caracteres a retornar")
+    max_chars: int = Field(default=6000, description="Maximo de caracteres a retornar")
 
 class FetchDocsInput(BaseModel):
-    library: str = Field(description="Nombre de la librería (ej: nestjs, react, prisma)")
+    library: str = Field(description="Nombre de la libreria (ej: nestjs, react, prisma)")
 
 
 # ─── Tools ───────────────────────────────────────────────────────────
@@ -111,7 +111,7 @@ class FetchURLTool(BaseTool):
     name: str = "fetch_url"
     description: str = (
         "Obtiene el contenido de una URL y lo retorna como texto plano. "
-        "Útil para leer documentación, issues, o páginas de referencia."
+        "Util para leer documentacion, issues, o paginas de referencia."
     )
     args_schema: type[BaseModel] = FetchURLInput
 
@@ -124,9 +124,9 @@ class FetchURLTool(BaseTool):
 class FetchDocsTool(BaseTool):
     name: str = "fetch_docs"
     description: str = (
-        "Obtiene la página principal de documentación oficial de una librería. "
-        f"Librerías conocidas: {', '.join(sorted(_DOCS_MAP.keys()))}. "
-        "Para otras librerías intenta docs.<library>.com."
+        "Obtiene la pagina principal de documentacion oficial de una libreria. "
+        f"Librerias conocidas: {', '.join(sorted(_DOCS_MAP.keys()))}. "
+        "Para otras librerias intenta docs.<library>.com."
     )
     args_schema: type[BaseModel] = FetchDocsInput
 

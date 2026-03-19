@@ -1,5 +1,5 @@
 """
-MCP de Git: inspección del repo local (solo lectura).
+MCP de Git: inspeccion del repo local (solo lectura).
 Los agentes pueden leer el estado del repo pero NUNCA escriben en git.
 """
 from __future__ import annotations
@@ -16,10 +16,10 @@ from pydantic import BaseModel, Field
 # ─── Schemas ─────────────────────────────────────────────────────────
 
 class GitDiffInput(BaseModel):
-    file_path: str = Field(default="", description="Ruta relativa al archivo a differenciar (vacío = todo)")
+    file_path: str = Field(default="", description="Ruta relativa al archivo a differenciar (vacio = todo)")
 
 class GitLogInput(BaseModel):
-    limit: int = Field(default=20, description="Número de commits a mostrar (máx 30)")
+    limit: int = Field(default=20, description="Numero de commits a mostrar (max 30)")
 
 class GitShowFileInput(BaseModel):
     ref: str = Field(description="Ref git (commit hash, rama, tag). Ej: HEAD, main, abc1234")
@@ -57,7 +57,7 @@ class GitStatusTool(BaseTool):
 
     def _run(self) -> str:
         if not _git_available():
-            return "Error: git no está instalado en el sistema."
+            return "Error: git no esta instalado en el sistema."
         out, code = _run_git(["status", "--short", "--branch"], self.project_root)
         if code != 0:
             return f"Error ejecutando git status: {out}"
@@ -66,13 +66,13 @@ class GitStatusTool(BaseTool):
 
 class GitDiffTool(BaseTool):
     name: str = "git_diff"
-    description: str = "Muestra los cambios no commiteados. Acepta un archivo específico (opcional)."
+    description: str = "Muestra los cambios no commiteados. Acepta un archivo especifico (opcional)."
     args_schema: type[BaseModel] = GitDiffInput
     project_root: Path = Path(".")
 
     def _run(self, file_path: str = "") -> str:
         if not _git_available():
-            return "Error: git no está instalado en el sistema."
+            return "Error: git no esta instalado en el sistema."
         args = ["diff"]
         if file_path:
             args.append("--")
@@ -93,7 +93,7 @@ class GitLogTool(BaseTool):
 
     def _run(self, limit: int = 20) -> str:
         if not _git_available():
-            return "Error: git no está instalado en el sistema."
+            return "Error: git no esta instalado en el sistema."
         limit = min(max(1, limit), 30)
         out, code = _run_git(
             ["log", f"--max-count={limit}", "--oneline", "--decorate", "--graph"],
@@ -101,18 +101,18 @@ class GitLogTool(BaseTool):
         )
         if code != 0:
             return f"Error ejecutando git log: {out}"
-        return out or "(sin commits aún)"
+        return out or "(sin commits aun)"
 
 
 class GitBranchesTool(BaseTool):
     name: str = "git_branches"
-    description: str = "Lista las ramas del repo ordenadas por fecha de último commit."
+    description: str = "Lista las ramas del repo ordenadas por fecha de ultimo commit."
     args_schema: type[BaseModel] = EmptyInput
     project_root: Path = Path(".")
 
     def _run(self) -> str:
         if not _git_available():
-            return "Error: git no está instalado en el sistema."
+            return "Error: git no esta instalado en el sistema."
         out, code = _run_git(
             ["branch", "-a", "--sort=-committerdate", "--format=%(refname:short)  %(committerdate:relative)"],
             self.project_root,
@@ -124,17 +124,17 @@ class GitBranchesTool(BaseTool):
 
 class GitShowFileTool(BaseTool):
     name: str = "git_show_file"
-    description: str = "Muestra el contenido de un archivo en un ref git específico (ej: HEAD, main, commit-hash)."
+    description: str = "Muestra el contenido de un archivo en un ref git especifico (ej: HEAD, main, commit-hash)."
     args_schema: type[BaseModel] = GitShowFileInput
     project_root: Path = Path(".")
 
     def _run(self, ref: str, file_path: str) -> str:
         if not _git_available():
-            return "Error: git no está instalado en el sistema."
+            return "Error: git no esta instalado en el sistema."
         # Sanitizar el ref: no permitir caracteres peligrosos
         safe_chars = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._/-~^@{}")
         if not all(c in safe_chars for c in ref):
-            return f"Error: ref inválido: {ref}"
+            return f"Error: ref invalido: {ref}"
         out, code = _run_git(["show", f"{ref}:{file_path}"], self.project_root)
         if code != 0:
             return f"Error: {out}"

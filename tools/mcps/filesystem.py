@@ -92,7 +92,7 @@ class ListDirTool(BaseTool):
             prefix = "📁 " if entry.is_dir() else "   "
             entries.append(f"{prefix}{entry.name}")
 
-        return "\n".join(entries) if entries else "(directorio vacío)"
+        return "\n".join(entries) if entries else "(directorio vacio)"
 
     def _safe_path(self, path: str) -> Optional[Path]:
         resolved = (self.project_root / path).resolve()

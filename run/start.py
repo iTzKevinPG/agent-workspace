@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Punto de entrada principal.
-Arranca el orquestador y mantiene la sesión interactiva activa.
+Arranca el orquestador y mantiene la sesion interactiva activa.
 
 Uso:
   python run/start.py --namespace ecommerce-web
@@ -33,11 +33,11 @@ Ejemplos:
   python run/start.py --namespace ecommerce-web
   python run/start.py --namespace ecommerce-web --project mi-tienda
 
-Comandos disponibles en sesión interactiva:
+Comandos disponibles en sesion interactiva:
   <cualquier texto>       → ejecutar tarea
   proyecto <nombre>       → cambiar proyecto activo
   estado                  → refrescar dashboard
-  salir / q               → terminar sesión
+  salir / q               → terminar sesion
 """,
     )
     parser.add_argument("--namespace", "-n", help="Nombre del namespace a usar")
@@ -46,7 +46,7 @@ Comandos disponibles en sesión interactiva:
 
     # Validar API key
     if not os.getenv("ANTHROPIC_API_KEY"):
-        print_error("ANTHROPIC_API_KEY no está definida en .env")
+        print_error("ANTHROPIC_API_KEY no esta definida en .env")
         print_info("Edita el archivo .env y agrega tu API key de Anthropic")
         sys.exit(1)
 
@@ -69,7 +69,7 @@ Comandos disponibles en sesión interactiva:
         print_error(str(e))
         sys.exit(1)
     except KeyboardInterrupt:
-        print_info("\nSesión interrumpida.")
+        print_info("\nSesion interrumpida.")
         sys.exit(0)
 
 

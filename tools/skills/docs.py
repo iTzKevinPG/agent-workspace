@@ -1,5 +1,5 @@
 """
-Skill de documentación.
+Skill de documentacion.
 Genera secciones de README, extrae endpoints y genera JSDoc/docstrings.
 Sin dependencias externas — solo stdlib.
 """
@@ -10,25 +10,25 @@ from typing import Any
 
 
 class DocsSkill:
-    """Utilidades de documentación para usar desde el orquestador o los agentes."""
+    """Utilidades de documentacion para usar desde el orquestador o los agentes."""
 
     def generate_readme_section(self, title: str, content_description: str) -> str:
         """
-        Genera una sección de README en Markdown dado un título y descripción
-        de qué debe contener. Retorna el bloque listo para editar.
+        Genera una seccion de README en Markdown dado un titulo y descripcion
+        de que debe contener. Retorna el bloque listo para editar.
         """
         slug = title.lower().replace(" ", "-").replace("/", "-")
         return (
             f"## {title}\n\n"
             f"<!-- TODO: {content_description} -->\n\n"
-            f"_(Sección pendiente de completar)_\n"
+            f"_(Seccion pendiente de completar)_\n"
         )
 
     def extract_endpoints(
         self, file_content: str, framework: str
     ) -> list[dict[str, str]]:
         """
-        Extrae endpoints de un archivo de código.
+        Extrae endpoints de un archivo de codigo.
         Soporta: nestjs, fastapi, express.
         Retorna lista de {"method", "path", "description"}.
         """
@@ -46,7 +46,7 @@ class DocsSkill:
                 for m in pattern.finditer(line):
                     method = m.group(1).upper()
                     path = m.group(2) or "/"
-                    # Buscar descripción en la línea siguiente (decorador ApiOperation si existe)
+                    # Buscar descripcion en la linea siguiente (decorador ApiOperation si existe)
                     desc = ""
                     if i + 1 < len(lines):
                         next_line = lines[i + 1]
@@ -66,7 +66,7 @@ class DocsSkill:
                 for m in pattern.finditer(line):
                     method = m.group(1).upper()
                     path = m.group(2) or "/"
-                    # Buscar docstring en la función siguiente
+                    # Buscar docstring en la funcion siguiente
                     desc = ""
                     for j in range(i + 1, min(i + 5, len(lines))):
                         doc_match = re.search(r'"""([^"]+)"""', lines[j])
@@ -90,13 +90,13 @@ class DocsSkill:
 
     def generate_jsdoc(self, function_signature: str, description: str) -> str:
         """
-        Genera el bloque JSDoc o docstring Python para una función.
-        Detecta automáticamente el lenguaje por la sintaxis de la firma.
+        Genera el bloque JSDoc o docstring Python para una funcion.
+        Detecta automaticamente el lenguaje por la sintaxis de la firma.
         """
         # Detectar si es Python (def ...) o JS/TS
         is_python = function_signature.strip().startswith("def ") or "->" in function_signature
 
-        # Extraer parámetros
+        # Extraer parametros
         params = self._extract_params(function_signature)
 
         if is_python:
@@ -106,7 +106,7 @@ class DocsSkill:
                 lines.append("Args:")
                 for p, ptype in params:
                     type_hint = f" ({ptype})" if ptype else ""
-                    lines.append(f"    {p}{type_hint}: TODO — describir parámetro")
+                    lines.append(f"    {p}{type_hint}: TODO — describir parametro")
                 lines.append("")
                 lines.append("Returns:")
                 lines.append("    TODO — describir retorno")
@@ -118,14 +118,14 @@ class DocsSkill:
                 lines.append(" *")
                 for p, ptype in params:
                     type_hint = f" {{{ptype}}}" if ptype else ""
-                    lines.append(f" * @param{type_hint} {p} TODO — describir parámetro")
+                    lines.append(f" * @param{type_hint} {p} TODO — describir parametro")
                 lines.append(" * @returns TODO — describir retorno")
             lines.append(" */")
             return "\n".join(lines)
 
     def _extract_params(self, signature: str) -> list[tuple[str, str]]:
-        """Extrae (nombre, tipo) de los parámetros de una firma de función."""
-        # Extraer lo que hay entre paréntesis
+        """Extrae (nombre, tipo) de los parametros de una firma de funcion."""
+        # Extraer lo que hay entre parentesis
         match = re.search(r"\(([^)]*)\)", signature)
         if not match:
             return []

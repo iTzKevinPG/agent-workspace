@@ -2,7 +2,7 @@
 Orquestador principal.
 - Carga namespace + agentes
 - Planifica tareas
-- Mantiene sesión interactiva esperando instrucciones
+- Mantiene sesion interactiva esperando instrucciones
 - Actualiza el dashboard en tiempo real
 """
 from __future__ import annotations
@@ -45,7 +45,7 @@ class Orchestrator:
         # Poblar skills en el dashboard
         self.state.namespace_skills = [s.name for s in self.ns.namespace_skills]
 
-    # ─── Sesión interactiva ──────────────────────────────────────────
+    # ─── Sesion interactiva ──────────────────────────────────────────
 
     def interactive_session(self):
         """
@@ -83,7 +83,7 @@ class Orchestrator:
                 dash.refresh()
                 self._run_task(raw, dash)
 
-                # Actualizar métricas
+                # Actualizar metricas
                 metrics = self.logger.summary()
                 self.state.update_metrics(
                     tokens=metrics["tokens_input"] + metrics["tokens_output"],
@@ -92,17 +92,17 @@ class Orchestrator:
                 )
                 dash.refresh()
 
-        print_info("Sesión terminada.")
+        print_info("Sesion terminada.")
         self.logger.summary()
 
-    # ─── Ejecución de una tarea ──────────────────────────────────────
+    # ─── Ejecucion de una tarea ──────────────────────────────────────
 
     def _run_task(self, task_description: str, dash: Dashboard | None = None):
         """
         Planifica y ejecuta una tarea usando el Crew de agentes.
         Primero el arquitecto analiza, luego delega a los agentes correctos.
         """
-        # 1. Planificación inicial con el arquitecto (si está activo)
+        # 1. Planificacion inicial con el arquitecto (si esta activo)
         plan = self._plan_task(task_description)
 
         # 2. Crear tareas en el dashboard
@@ -147,12 +147,12 @@ class Orchestrator:
             if dash:
                 dash.refresh()
 
-    # ─── Planificación ───────────────────────────────────────────────
+    # ─── Planificacion ───────────────────────────────────────────────
 
     def _plan_task(self, task_description: str) -> list[dict]:
         """
         El arquitecto (o el orquestador si no hay arquitecto) divide
-        la tarea en pasos asignados a agentes específicos.
+        la tarea en pasos asignados a agentes especificos.
         """
         architect_cfg = next(
             (a for a in self.agent_configs if a.name == "architect"), None
@@ -169,23 +169,23 @@ class Orchestrator:
         architect = self._build_crewai_agent(architect_cfg)
         plan_task = Task(
             description=f"""
-Analiza esta tarea y divídela en pasos concretos.
-Asigna cada paso al agente más adecuado de: {[a.name for a in self.agent_configs]}.
+Analiza esta tarea y dividela en pasos concretos.
+Asigna cada paso al agente mas adecuado de: {[a.name for a in self.agent_configs]}.
 
 Tarea: {task_description}
 
 Contexto del namespace:
 - Stack: {', '.join(self.ns.stack)}
 - Proyecto activo: {self.project_name or 'sin proyecto'}
-- Historial de sesión: {self.memory.summary_for_agents()}
+- Historial de sesion: {self.memory.summary_for_agents()}
 
-Responde ÚNICAMENTE con una lista YAML con este formato exacto:
+Responde UNICAMENTE con una lista YAML con este formato exacto:
 - agent: <nombre_agente>
-  description: <descripción clara del paso>
+  description: <descripcion clara del paso>
 - agent: <nombre_agente>
-  description: <descripción clara del paso>
+  description: <descripcion clara del paso>
 
-Máximo 5 pasos. Sin texto adicional.
+Maximo 5 pasos. Sin texto adicional.
 """,
             agent=architect,
             expected_output="Lista YAML de pasos con agent y description",
@@ -201,7 +201,7 @@ Máximo 5 pasos. Sin texto adicional.
         import yaml
         import re
 
-        # Limpiar markdown si el modelo envolvió en ```yaml
+        # Limpiar markdown si el modelo envolvio en ```yaml
         clean = re.sub(r"```(?:yaml)?|```", "", raw).strip()
         try:
             steps = yaml.safe_load(clean)
@@ -224,7 +224,7 @@ Máximo 5 pasos. Sin texto adicional.
         )
         return [{"agent": fallback_agent, "description": raw[:200]}]
 
-    # ─── Ejecución de paso ───────────────────────────────────────────
+    # ─── Ejecucion de paso ───────────────────────────────────────────
 
     def _execute_step(self, step: dict, original_task: str) -> str:
         agent_name = step["agent"]
@@ -242,20 +242,20 @@ Contexto completo:
 - Namespace: {self.ns.name} — {self.ns.description}
 - Stack: {', '.join(self.ns.stack)}
 - Proyecto activo: {self.project_root}
-- Metodología: {self.ns.methodology}
+- Metodologia: {self.ns.methodology}
 - Historial: {self.memory.summary_for_agents()}
 
-Estándares a seguir:
-{self.ns.standards[:800] if self.ns.standards else '(sin estándares definidos aún)'}
+Estandares a seguir:
+{self.ns.standards[:800] if self.ns.standards else '(sin estandares definidos aun)'}
 
 Reglas:
-{self.ns.rules[:600] if self.ns.rules else '(sin reglas definidas aún)'}
+{self.ns.rules[:600] if self.ns.rules else '(sin reglas definidas aun)'}
 
 Instrucciones:
 - Usa las herramientas disponibles para leer archivos existentes antes de escribir
-- Sigue los estándares del namespace
-- Si encuentras algo que bloquea la tarea, descríbelo claramente
-- Al terminar, resume qué hiciste en 2-3 líneas
+- Sigue los estandares del namespace
+- Si encuentras algo que bloquea la tarea, describelo claramente
+- Al terminar, resume que hiciste en 2-3 lineas
 """
         skills_ctx = self._namespace_skills_context(agent_cfg.name)
         if skills_ctx:
@@ -277,11 +277,11 @@ Instrucciones:
         result = crew.kickoff()
         return str(result)
 
-    # ─── Construcción de agentes CrewAI ─────────────────────────────
+    # ─── Construccion de agentes CrewAI ─────────────────────────────
 
     def _load_tools_for_agent(self, agent_cfg: AgentConfig) -> list:
         """
-        Carga las tools del agente según los MCPs declarados en su YAML.
+        Carga las tools del agente segun los MCPs declarados en su YAML.
         Usa el registry central — no hardcodea ninguna tool.
         """
         tools = []
@@ -327,7 +327,7 @@ Instrucciones:
         """
         Genera el bloque de contexto de namespace skills para un agente.
         Solo incluye las skills cuyo `roles` incluye el rol del agente,
-        o todas si `roles` está vacío.
+        o todas si `roles` esta vacio.
         """
         skills = [
             s for s in self.ns.namespace_skills
@@ -342,12 +342,12 @@ Instrucciones:
             "si el usuario lo solicita o si identificas que el proyecto la necesita."
         )
         lines.append(
-            "Para instalar una skill, lee su instrucción completa y sigue los pasos.\n"
+            "Para instalar una skill, lee su instruccion completa y sigue los pasos.\n"
         )
         for s in skills:
             lines.append(f"### {s.name}")
             lines.append(f"{s.description}")
-            lines.append(f"Instrucción completa:\n{s.instruction}\n")
+            lines.append(f"Instruccion completa:\n{s.instruction}\n")
 
         return "\n".join(lines)
 
@@ -368,6 +368,6 @@ Instrucciones:
         if candidate.exists():
             return candidate.resolve()
 
-        # Si no existe, usar projects_path como raíz y avisar
-        print_info(f"Proyecto '{project_name}' no encontrado en {self.ns.projects_path}. Usando raíz del namespace.")
+        # Si no existe, usar projects_path como raiz y avisar
+        print_info(f"Proyecto '{project_name}' no encontrado en {self.ns.projects_path}. Usando raiz del namespace.")
         return self.ns.projects_path.resolve()

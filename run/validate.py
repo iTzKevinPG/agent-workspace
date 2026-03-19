@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Valida que el entorno esté correctamente configurado antes de arrancar.
-Corre automáticamente desde setup.sh.
+Valida que el entorno este correctamente configurado antes de arrancar.
+Corre automaticamente desde setup.sh.
 
 Uso manual:
   python run/validate.py
@@ -46,7 +46,7 @@ def validate_env() -> bool:
 
     api_key = os.getenv("ANTHROPIC_API_KEY", "")
     ok &= check("ANTHROPIC_API_KEY", bool(api_key and not api_key.endswith("xxx")),
-                "(vacía o con valor de ejemplo)" if not api_key else "")
+                "(vacia o con valor de ejemplo)" if not api_key else "")
 
     model = os.getenv("ANTHROPIC_MODEL", "claude-haiku-4-5-20251001")
     check("ANTHROPIC_MODEL", True, model)
@@ -87,7 +87,7 @@ def validate_namespace(name: str) -> bool:
 
         projects_dir = ns_dir / "projects"
         check("projects/", projects_dir.exists(),
-              "crea symlinks a tus repos aquí" if not projects_dir.exists() else "")
+              "crea symlinks a tus repos aqui" if not projects_dir.exists() else "")
 
         if projects_dir.exists():
             projects = list(projects_dir.iterdir())
@@ -150,7 +150,7 @@ def main():
     parser.add_argument("--namespace", "-n", help="Namespace a validar")
     args = parser.parse_args()
 
-    console.print("\n[bold green]agent-workspace — validación de entorno[/]")
+    console.print("\n[bold green]agent-workspace — validacion de entorno[/]")
 
     env_ok = validate_env()
     deps_ok = validate_deps()

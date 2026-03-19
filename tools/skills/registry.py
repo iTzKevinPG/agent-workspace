@@ -1,6 +1,6 @@
 """
 Registry central de Skills.
-Permite al orquestador y otros módulos descubrir y cargar skills por nombre.
+Permite al orquestador y otros modulos descubrir y cargar skills por nombre.
 """
 from __future__ import annotations
 
@@ -11,14 +11,14 @@ from dataclasses import dataclass
 class SkillDefinition:
     name: str
     description: str
-    roles: list[str]   # qué roles se benefician de esta skill
+    roles: list[str]   # que roles se benefician de esta skill
     cls: type          # la clase a instanciar
 
 
 SKILL_REGISTRY: dict[str, SkillDefinition] = {
     "codegen": SkillDefinition(
         name="codegen",
-        description="Aplicar estándares de código, generar headers, detectar stack",
+        description="Aplicar estandares de codigo, generar headers, detectar stack",
         roles=["architect", "backend", "frontend", "devops"],
         cls=None,  # se asigna lazy para evitar import circular
     ),
@@ -38,7 +38,7 @@ SKILL_REGISTRY: dict[str, SkillDefinition] = {
 
 
 def _init_registry():
-    """Carga las clases lazy para evitar imports en el arranque del módulo."""
+    """Carga las clases lazy para evitar imports en el arranque del modulo."""
     from tools.skills.codegen import CodegenSkill
     from tools.skills.testing import TestingSkill
     from tools.skills.docs import DocsSkill

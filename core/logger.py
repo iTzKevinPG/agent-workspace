@@ -1,6 +1,6 @@
 """
-Logger de sesión: tokens consumidos, costos, tiempos y errores.
-Alimenta el dashboard con métricas en tiempo real.
+Logger de sesion: tokens consumidos, costos, tiempos y errores.
+Alimenta el dashboard con metricas en tiempo real.
 """
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).parent.parent
 LOGS_DIR = ROOT / "logs"
 
-# Precios Anthropic por modelo (por millón de tokens)
+# Precios Anthropic por modelo (por millon de tokens)
 MODEL_PRICES = {
     "claude-haiku-4-5-20251001":  {"input": 0.80,  "output": 4.00},
     "claude-sonnet-4-6":           {"input": 3.00,  "output": 15.00},
@@ -32,11 +32,11 @@ class SessionLogger:
         self.total_cost_usd = 0.0
         self.start_time = datetime.now()
 
-        # Archivo de log de sesión
+        # Archivo de log de sesion
         log_path = LOGS_DIR / f"{namespace}_{project}_{self.session_id}.jsonl"
         self._log_path = log_path
 
-        # Logger estándar Python
+        # Logger estandar Python
         level = getattr(logging, os.getenv("LOG_LEVEL", "INFO"))
         logging.basicConfig(
             level=level,
@@ -70,7 +70,7 @@ class SessionLogger:
         if self.total_cost_usd >= alert:
             self._log.warning(
                 f"Alerta de costo: ${self.total_cost_usd:.2f} USD acumulados "
-                f"(límite: ${alert})"
+                f"(limite: ${alert})"
             )
 
     def elapsed(self) -> str:

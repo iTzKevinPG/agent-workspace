@@ -37,10 +37,10 @@ class NamespaceSkill:
     name: str
     description: str
     path: Path              # ruta absoluta a la carpeta de la skill
-    roles: list[str]        # agentes que pueden instalarla (vacío = todos)
+    roles: list[str]        # agentes que pueden instalarla (vacio = todos)
     has_templates: bool     # si existe la subcarpeta templates/
     has_python: bool        # si existe skill.py
-    instruction: str        # contenido de setup.md ya leído
+    instruction: str        # contenido de setup.md ya leido
 
 
 @dataclass
@@ -112,7 +112,7 @@ def load_namespace(name: str) -> NamespaceConfig:
     if not ns_dir.exists():
         raise FileNotFoundError(
             f"Namespace '{name}' no encontrado en namespaces/.\n"
-            f"Créalo con: python run/init.py --name {name}"
+            f"Crealo con: python run/init.py --name {name}"
         )
 
     data = _load_yaml(ns_dir / "namespace.yaml")

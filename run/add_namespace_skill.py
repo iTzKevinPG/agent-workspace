@@ -6,7 +6,7 @@ Uso:
   # Desde template versionado en este repo:
   python run/add_namespace_skill.py --namespace ecommerce-web --skill stripe --from-template
 
-  # Skill vacía para escribir desde cero:
+  # Skill vacia para escribir desde cero:
   python run/add_namespace_skill.py --namespace ecommerce-web --skill mi-skill
 """
 from __future__ import annotations
@@ -31,20 +31,20 @@ console = Console()
 
 def _extract_description(setup_md: Path) -> str:
     """
-    Extrae la descripción de un setup.md: el primer párrafo bajo '## Qué hace',
-    o como fallback la primera línea de texto significativa del archivo.
+    Extrae la descripcion de un setup.md: el primer parrafo bajo '## Que hace',
+    o como fallback la primera linea de texto significativa del archivo.
     """
     text = setup_md.read_text(encoding="utf-8")
 
-    # Buscar sección "## Qué hace"
-    match = re.search(r"##\s+Qué hace\s*\n(.+?)(?:\n#|\Z)", text, re.DOTALL)
+    # Buscar seccion "## Que hace"
+    match = re.search(r"##\s+Que hace\s*\n(.+?)(?:\n#|\Z)", text, re.DOTALL)
     if match:
         paragraph = match.group(1).strip().splitlines()
         first_line = next((l.strip() for l in paragraph if l.strip()), "")
         if first_line:
             return first_line
 
-    # Fallback: primera línea que no sea un heading
+    # Fallback: primera linea que no sea un heading
     for line in text.splitlines():
         stripped = line.strip()
         if stripped and not stripped.startswith("#"):
@@ -70,7 +70,7 @@ def _update_namespace_yaml(ns_yaml: Path, skill_name: str, description: str, ski
 
     # Si ya existe esta skill, no duplicar
     if f"name: {skill_name}" in content:
-        console.print(f"  [yellow]⚠[/]  La skill '{skill_name}' ya está en namespace.yaml — no se duplica")
+        console.print(f"  [yellow]⚠[/]  La skill '{skill_name}' ya esta en namespace.yaml — no se duplica")
         return
 
     # Reemplazar "namespace_skills: []" por la lista con la nueva entrada
@@ -84,7 +84,7 @@ def _update_namespace_yaml(ns_yaml: Path, skill_name: str, description: str, ski
 
     # Si ya hay una lista, agregar al final de ella
     if "namespace_skills:" in content:
-        # Insertar antes del primer comentario después de namespace_skills o al final
+        # Insertar antes del primer comentario despues de namespace_skills o al final
         lines = content.splitlines(keepends=True)
         insert_idx = None
         in_section = False
@@ -94,7 +94,7 @@ def _update_namespace_yaml(ns_yaml: Path, skill_name: str, description: str, ski
                 continue
             if in_section:
                 stripped = line.strip()
-                # Seguir mientras sean elementos de la lista o líneas vacías
+                # Seguir mientras sean elementos de la lista o lineas vacias
                 if stripped.startswith("- ") or stripped.startswith("  ") or stripped == "":
                     insert_idx = i + 1
                 else:
@@ -129,7 +129,7 @@ def main():
     ns_dir = NAMESPACES_DIR / args.namespace
     if not ns_dir.exists():
         console.print(f"[red]✗[/]  Namespace '{args.namespace}' no encontrado en namespaces/")
-        console.print(f"   Créalo con: python run/init.py --name {args.namespace}")
+        console.print(f"   Crealo con: python run/init.py --name {args.namespace}")
         sys.exit(1)
 
     ns_yaml = ns_dir / "namespace.yaml"
@@ -141,7 +141,7 @@ def main():
 
     if dest_dir.exists():
         console.print(f"[yellow]⚠[/]  La skill ya existe en {dest_dir.relative_to(ROOT)}")
-        console.print("   Usa --force para sobreescribir (no implementado aún)")
+        console.print("   Usa --force para sobreescribir (no implementado aun)")
         sys.exit(1)
 
     # ── Determinar origen ─────────────────────────────────────────────────────
@@ -162,7 +162,7 @@ def main():
 
     shutil.copytree(src_dir, dest_dir)
 
-    # Si se copió desde _template, renombrar setup.md.tpl → setup.md
+    # Si se copio desde _template, renombrar setup.md.tpl → setup.md
     tpl_setup = dest_dir / "setup.md.tpl"
     if tpl_setup.exists():
         final_setup = dest_dir / "setup.md"
@@ -170,7 +170,7 @@ def main():
         final_setup.write_text(tpl_content, encoding="utf-8")
         tpl_setup.unlink()
 
-    # ── Extraer descripción y actualizar namespace.yaml ───────────────────────
+    # ── Extraer descripcion y actualizar namespace.yaml ───────────────────────
 
     setup_md = dest_dir / "setup.md"
     description = _extract_description(setup_md) if setup_md.exists() else ""
@@ -189,9 +189,9 @@ def main():
         Text.assemble(
             (f"✓ Skill '{args.skill}' agregada al namespace '{args.namespace}'\n\n", "bold green"),
             *[(f"  {f}\n", "dim") for f in files_created],
-            ("\nPróximos pasos:\n", "bold white"),
+            ("\nProximos pasos:\n", "bold white"),
             (f"  1. Edita namespaces/{args.namespace}/skills/{args.skill}/setup.md\n", "dim"),
-            (f"     para personalizar la instrucción al stack de tu proyecto\n", "dim"),
+            (f"     para personalizar la instruccion al stack de tu proyecto\n", "dim"),
             (f"  2. Agrega templates en skills/{args.skill}/templates/ si aplica\n", "dim"),
             (f"  3. Arranca el orquestador y dile al agente:\n", "dim"),
             (f'     "instala la skill {args.skill} en este proyecto"\n', "green"),

@@ -1,7 +1,7 @@
 """
-MCP de Shell: ejecución de comandos sandboxed dentro del proyecto activo.
-Whitelist configurable vía env SHELL_ALLOWED_COMMANDS.
-Timeout configurable vía env SHELL_TIMEOUT.
+MCP de Shell: ejecucion de comandos sandboxed dentro del proyecto activo.
+Whitelist configurable via env SHELL_ALLOWED_COMMANDS.
+Timeout configurable via env SHELL_TIMEOUT.
 """
 from __future__ import annotations
 
@@ -49,7 +49,7 @@ class RunCommandTool(BaseTool):
     description: str = (
         "Ejecuta un comando del proyecto (build, tests, linting) dentro del directorio activo. "
         f"Comandos permitidos por defecto: {_DEFAULT_ALLOWED}. "
-        "Retorna stdout, stderr y código de salida."
+        "Retorna stdout, stderr y codigo de salida."
     )
     args_schema: type[BaseModel] = RunCommandInput
     project_root: Path = Path(".")
@@ -68,13 +68,13 @@ class RunCommandTool(BaseTool):
             return f"Error parseando el comando: {e}"
 
         if not tokens:
-            return "Error: comando vacío."
+            return "Error: comando vacio."
 
         first_token = Path(tokens[0]).name  # solo el nombre base, no la ruta
         whitelist = _get_whitelist()
         if first_token not in whitelist:
             return (
-                f"Error: '{first_token}' no está en la whitelist de comandos permitidos.\n"
+                f"Error: '{first_token}' no esta en la whitelist de comandos permitidos.\n"
                 f"Whitelist actual: {', '.join(sorted(whitelist))}\n"
                 f"Para agregar comandos, edita SHELL_ALLOWED_COMMANDS en .env"
             )
@@ -89,7 +89,7 @@ class RunCommandTool(BaseTool):
                 timeout=timeout,
             )
         except subprocess.TimeoutExpired:
-            return f"Error: comando expiró después de {timeout}s: {command}"
+            return f"Error: comando expiro despues de {timeout}s: {command}"
         except FileNotFoundError:
             return f"Error: comando no encontrado en el sistema: {tokens[0]}"
         except Exception as e:

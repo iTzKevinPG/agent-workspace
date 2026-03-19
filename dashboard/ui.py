@@ -73,7 +73,7 @@ def _files_table(state: DashboardState) -> Table | None:
     t.add_column("AGENTE", style="dim", width=12)
     t.add_column("ARCHIVO MODIFICADO")
 
-    for agent, filepath in all_files[-8:]:  # máximo últimos 8
+    for agent, filepath in all_files[-8:]:  # maximo ultimos 8
         t.add_row(agent, Text(filepath, style="cyan"))
 
     return t
@@ -96,14 +96,14 @@ def _alerts_panel(state: DashboardState) -> Panel | None:
         ))
 
     content = Text("\n").join(lines)
-    return Panel(content, title="[bold yellow]necesita tu atención[/]", border_style="yellow", padding=(0, 1))
+    return Panel(content, title="[bold yellow]necesita tu atencion[/]", border_style="yellow", padding=(0, 1))
 
 
 def _footer(state: DashboardState) -> Text:
     t = Text(justify="left", style="dim")
     t.append(f"  tokens: {state.tokens_today:,}  ·  ")
     t.append(f"costo: ${state.cost_today:.4f}  ·  ")
-    t.append(f"sesión: {state.session_elapsed}")
+    t.append(f"sesion: {state.session_elapsed}")
     t.append("      ")
     t.append("[q]", style="bold white")
     t.append(" salir  ")
@@ -156,7 +156,7 @@ def build_layout(state: DashboardState) -> Panel:
     if alerts_panel:
         sections.append(alerts_panel)
 
-    # Footer con métricas
+    # Footer con metricas
     sections.append(_footer(state))
 
     # Combinar todo en un panel maestro

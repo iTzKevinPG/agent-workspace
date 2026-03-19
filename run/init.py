@@ -164,7 +164,7 @@ def create_namespace(answers: dict):
         Text.assemble(
             (f"✓ Namespace '{name}' creado\n\n", "bold green"),
             *[(f"  {f}\n", "dim") for f in files_created],
-            ("\nPróximos pasos:\n", "bold white"),
+            ("\nProximos pasos:\n", "bold white"),
             (f"  1. Edita namespaces/{name}/standards.md con tus convenciones\n", "dim"),
             (f"  2. Edita namespaces/{name}/rules.md con tus restricciones\n", "dim"),
             (f"  3. Agrega symlinks en namespaces/{name}/projects/\n", "dim"),
@@ -185,9 +185,9 @@ def main():
     console.print(Panel(
         Text.assemble(
             ("agent-workspace\n", "bold green"),
-            ("Configuración de namespace nuevo\n\n", "white"),
+            ("Configuracion de namespace nuevo\n\n", "white"),
             ("Responde las preguntas para personalizar tu entorno.\n", "dim"),
-            ("Podrás editar los archivos generados después.", "dim"),
+            ("Podras editar los archivos generados despues.", "dim"),
         ),
         border_style="green",
         padding=(1, 2),
@@ -195,7 +195,7 @@ def main():
 
     questions = load_questions()
 
-    # Pre-rellenar nombre si se pasó como argumento
+    # Pre-rellenar nombre si se paso como argumento
     if args.name:
         questions = [q for q in questions if q["key"] != "name"]
         answers = ask_questions(questions)

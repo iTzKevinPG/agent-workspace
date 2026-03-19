@@ -1,6 +1,6 @@
 """
-MCP de Mermaid: generación y guardado de diagramas.
-Genera código Mermaid a partir de descripciones en lenguaje natural
+MCP de Mermaid: generacion y guardado de diagramas.
+Genera codigo Mermaid a partir de descripciones en lenguaje natural
 y puede guardarlos en archivos .md dentro del proyecto.
 """
 from __future__ import annotations
@@ -16,8 +16,8 @@ _SUPPORTED_TYPES = ["flowchart", "sequenceDiagram", "classDiagram", "erDiagram",
 _TEMPLATES: dict[str, str] = {
     "flowchart": """\
 flowchart TD
-    A[Inicio] --> B{{¿Condición?}}
-    B -- Sí --> C[Proceso A]
+    A[Inicio] --> B{{¿Condicion?}}
+    B -- Si --> C[Proceso A]
     B -- No --> D[Proceso B]
     C --> E[Fin]
     D --> E
@@ -104,13 +104,13 @@ class GenerateDiagramInput(BaseModel):
         description=f"Tipo de diagrama: {', '.join(_SUPPORTED_TYPES)}"
     )
     description: str = Field(
-        description="Descripción en lenguaje natural de lo que debe representar el diagrama"
+        description="Descripcion en lenguaje natural de lo que debe representar el diagrama"
     )
 
 class SaveDiagramInput(BaseModel):
-    diagram_code: str = Field(description="Código Mermaid a guardar")
+    diagram_code: str = Field(description="Codigo Mermaid a guardar")
     file_path: str = Field(description="Ruta relativa del archivo .md donde guardar el diagrama")
-    title: str = Field(default="", description="Título opcional del diagrama")
+    title: str = Field(default="", description="Titulo opcional del diagrama")
 
 
 # ─── Tools ───────────────────────────────────────────────────────────
@@ -118,7 +118,7 @@ class SaveDiagramInput(BaseModel):
 class GenerateDiagramTool(BaseTool):
     name: str = "generate_diagram"
     description: str = (
-        "Genera código Mermaid para un diagrama dado un tipo y descripción. "
+        "Genera codigo Mermaid para un diagrama dado un tipo y descripcion. "
         f"Tipos soportados: {', '.join(_SUPPORTED_TYPES)}. "
         "Retorna el bloque Mermaid listo para usar o guardar."
     )
@@ -150,13 +150,13 @@ class GenerateDiagramTool(BaseTool):
 
         return (
             f"## Instrucciones para el diagrama\n\n"
-            f"**Descripción solicitada:** {description}\n\n"
+            f"**Descripcion solicitada:** {description}\n\n"
             f"**Tipo:** `{dtype}`\n\n"
-            f"Usa la siguiente plantilla como base y adáptala a la descripción. "
-            f"Después usa `save_diagram` para guardar el resultado.\n\n"
+            f"Usa la siguiente plantilla como base y adaptala a la descripcion. "
+            f"Despues usa `save_diagram` para guardar el resultado.\n\n"
             f"**Plantilla base:**\n"
             f"```mermaid\n{template}```\n\n"
-            f"Adapta los nodos, relaciones y etiquetas según: {description}"
+            f"Adapta los nodos, relaciones y etiquetas segun: {description}"
         )
 
 
@@ -174,14 +174,14 @@ class SaveDiagramTool(BaseTool):
         if not target:
             return f"Error: ruta fuera del proyecto permitido: {file_path}"
 
-        # Asegurar extensión .md
+        # Asegurar extension .md
         if not file_path.endswith(".md"):
             file_path = file_path + ".md"
             target = self._safe_path(file_path)
             if not target:
                 return f"Error: ruta fuera del proyecto permitido: {file_path}"
 
-        # Limpiar el código (remover bloques mermaid si ya los tiene)
+        # Limpiar el codigo (remover bloques mermaid si ya los tiene)
         code = diagram_code.strip()
         if code.startswith("```mermaid"):
             code = code[len("```mermaid"):].strip()

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-Lanza una sola tarea sin sesión interactiva.
-Útil para automatizaciones o scripts externos.
+Lanza una sola tarea sin sesion interactiva.
+Util para automatizaciones o scripts externos.
 
 Uso:
   python run/task.py --namespace ecommerce-web --project mi-tienda \
-    --task "crear endpoint GET /products con paginación"
+    --task "crear endpoint GET /products con paginacion"
 """
 from __future__ import annotations
 
@@ -29,11 +29,11 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--namespace", "-n", required=True)
     parser.add_argument("--project",   "-p", default=None)
-    parser.add_argument("--task",      "-t", required=True, help="Descripción de la tarea")
+    parser.add_argument("--task",      "-t", required=True, help="Descripcion de la tarea")
     args = parser.parse_args()
 
     if not os.getenv("ANTHROPIC_API_KEY"):
-        print_error("ANTHROPIC_API_KEY no está definida en .env")
+        print_error("ANTHROPIC_API_KEY no esta definida en .env")
         sys.exit(1)
 
     try:

@@ -1,5 +1,5 @@
 """
-Memoria compartida entre agentes durante una sesión.
+Memoria compartida entre agentes durante una sesion.
 Guarda decisiones, archivos modificados y resumen de tareas anteriores.
 """
 from __future__ import annotations
@@ -24,7 +24,7 @@ class TaskMemory:
 
 
 class SessionMemory:
-    """Memoria de la sesión actual — se limpia al arrancar."""
+    """Memoria de la sesion actual — se limpia al arrancar."""
 
     def __init__(self, namespace: str, project: str):
         self.namespace = namespace
@@ -47,22 +47,22 @@ class SessionMemory:
     def summary_for_agents(self) -> str:
         """Resumen compacto para incluir en el contexto de cada agente."""
         if not self.tasks and not self.decisions:
-            return "Primera tarea de esta sesión."
+            return "Primera tarea de esta sesion."
 
         lines = []
         if self.decisions:
-            lines.append("Decisiones tomadas esta sesión:")
+            lines.append("Decisiones tomadas esta sesion:")
             lines.extend(f"  - {d}" for d in self.decisions)
 
         done = [t for t in self.tasks if t.status == "done"]
         if done:
             lines.append(f"\nTareas completadas ({len(done)}):")
-            for t in done[-5:]:  # máximo últimas 5
+            for t in done[-5:]:  # maximo ultimas 5
                 lines.append(f"  - [{t.agent}] {t.task}")
                 if t.files_modified:
                     lines.append(f"    archivos: {', '.join(t.files_modified[:3])}")
 
-        return "\n".join(lines) if lines else "Sin historial relevante aún."
+        return "\n".join(lines) if lines else "Sin historial relevante aun."
 
     def _persist(self):
         """Guarda estado en disco para poder inspeccionar entre sesiones."""

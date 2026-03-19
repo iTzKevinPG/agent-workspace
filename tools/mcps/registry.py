@@ -1,7 +1,7 @@
 """
 Registry central de MCPs.
-El orquestador usa este módulo para cargar las tools de cada agente
-según los MCPs declarados en su YAML, sin hardcodear nada.
+El orquestador usa este modulo para cargar las tools de cada agente
+segun los MCPs declarados en su YAML, sin hardcodear nada.
 """
 from __future__ import annotations
 
@@ -16,10 +16,10 @@ from crewai.tools import BaseTool
 class MCPDefinition:
     name: str
     description: str
-    roles: list[str]           # qué roles se benefician de este MCP
-    requires_env: list[str]    # vars de entorno requeridas (vacío = sin requisitos)
+    roles: list[str]           # que roles se benefician de este MCP
+    requires_env: list[str]    # vars de entorno requeridas (vacio = sin requisitos)
     optional_env: list[str]    # vars de entorno opcionales
-    factory: Callable          # función que construye las tools
+    factory: Callable          # funcion que construye las tools
     install_hint: str = ""     # mensaje de ayuda si falta algo
 
 
@@ -76,7 +76,7 @@ MCP_REGISTRY: dict[str, MCPDefinition] = {
     ),
     "git": MCPDefinition(
         name="git",
-        description="Inspección del repo git local (solo lectura: status, diff, log, branches)",
+        description="Inspeccion del repo git local (solo lectura: status, diff, log, branches)",
         roles=["architect", "backend", "frontend", "qa", "devops"],
         requires_env=[],
         optional_env=[],
@@ -85,7 +85,7 @@ MCP_REGISTRY: dict[str, MCPDefinition] = {
     ),
     "fetch": MCPDefinition(
         name="fetch",
-        description="Obtener documentación oficial y contenido de URLs",
+        description="Obtener documentacion oficial y contenido de URLs",
         roles=["architect", "backend", "frontend", "devops"],
         requires_env=[],
         optional_env=[],
@@ -101,7 +101,7 @@ MCP_REGISTRY: dict[str, MCPDefinition] = {
     ),
     "sequential_thinking": MCPDefinition(
         name="sequential_thinking",
-        description="Razonamiento estructurado para problemas complejos de diseño",
+        description="Razonamiento estructurado para problemas complejos de diseno",
         roles=["architect"],
         requires_env=[],
         optional_env=[],
@@ -109,7 +109,7 @@ MCP_REGISTRY: dict[str, MCPDefinition] = {
     ),
     "mermaid": MCPDefinition(
         name="mermaid",
-        description="Generación y guardado de diagramas Mermaid (flujo, secuencia, ER, clases)",
+        description="Generacion y guardado de diagramas Mermaid (flujo, secuencia, ER, clases)",
         roles=["architect", "devops"],
         requires_env=[],
         optional_env=[],
@@ -118,10 +118,10 @@ MCP_REGISTRY: dict[str, MCPDefinition] = {
 }
 
 
-# ─── API pública ─────────────────────────────────────────────────────
+# ─── API publica ─────────────────────────────────────────────────────
 
 def get_mcp(name: str) -> MCPDefinition | None:
-    """Retorna la definición de un MCP por nombre, o None si no existe."""
+    """Retorna la definicion de un MCP por nombre, o None si no existe."""
     return MCP_REGISTRY.get(name)
 
 
@@ -133,7 +133,7 @@ def list_available() -> list[str]:
 def missing_env(mcp_name: str) -> list[str]:
     """
     Retorna la lista de variables de entorno requeridas que faltan.
-    Lista vacía significa que el MCP está listo para usarse.
+    Lista vacia significa que el MCP esta listo para usarse.
     """
     import os
     mcp = MCP_REGISTRY.get(mcp_name)
