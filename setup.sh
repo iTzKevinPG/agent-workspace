@@ -28,7 +28,7 @@ if [ ! -d .venv ]; then
   echo "✓ Entorno virtual creado en .venv/"
 fi
 
-source .venv/bin/activate
+source .venv/Scripts/activate 2>/dev/null || source .venv/bin/activate
 pip install -q -e .
 echo "✓ Dependencias instaladas"
 
@@ -42,7 +42,7 @@ echo ""
 echo "Próximos pasos:"
 echo "  1. Edita .env con tu ANTHROPIC_API_KEY"
 echo "  2. Crea tu primer namespace:"
-echo "     source .venv/bin/activate"
+echo "     source .venv/Scripts/activate 2>/dev/null || source .venv/bin/activate"
 echo "     python run/init.py"
 echo "  3. Arranca el orquestador:"
 echo "     python run/start.py --namespace <nombre>"

@@ -24,6 +24,7 @@ Edita `.env` con tu `ANTHROPIC_API_KEY`.
 ## Crear un namespace
 
 ```bash
+source .venv/Scripts/activate
 python run/init.py
 ```
 
