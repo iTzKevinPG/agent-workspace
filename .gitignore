@@ -1,6 +1,16 @@
 # Secrets — nunca a git
 .env
 
+# Configuracion local de herramientas AI (especifica de cada dev)
+.claude/settings.local.json
+.cursor/settings.json
+.kiro/settings/
+.windsurf/
+.continue/
+.codeium/
+.tabnine/
+.aider*
+
 # Namespaces — se generan localmente con init.py
 namespaces/
 

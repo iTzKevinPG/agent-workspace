@@ -63,12 +63,18 @@ python run/add_namespace_skill.py --namespace mi-namespace --skill mi-skill --fr
 # Desde template versionado en este repo:
 python run/add_namespace_skill.py --namespace ecommerce-web --skill stripe --from-template
 
+# Desde una carpeta externa (acepta SKILL.md o setup.md):
+python run/add_namespace_skill.py --namespace ecommerce-web --skill mi-skill --from-path /ruta/a/mi-skill
+
 # Skill vacia para escribir desde cero:
 python run/add_namespace_skill.py --namespace ecommerce-web --skill auth0
 ```
 
 El script copia los archivos a `namespaces/<namespace>/skills/<skill>/` y agrega
 la entrada al `namespace.yaml`.
+
+> **Nota sobre SKILL.md:** si la carpeta fuente usa `SKILL.md` en lugar de `setup.md`
+> (formato alternativo), el script lo renombra automaticamente a `setup.md` al copiar.
 
 ---
 

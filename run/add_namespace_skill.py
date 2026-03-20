@@ -6,6 +6,9 @@ Uso:
   # Desde template versionado en este repo:
   python run/add_namespace_skill.py --namespace ecommerce-web --skill stripe --from-template
 
+  # Desde una ruta externa (carpeta con SKILL.md o setup.md):
+  python run/add_namespace_skill.py --namespace ecommerce-web --skill stripe --from-path /ruta/a/skill
+
   # Skill vacia para escribir desde cero:
   python run/add_namespace_skill.py --namespace ecommerce-web --skill mi-skill
 """
@@ -31,26 +34,49 @@ console = Console()
 
 def _extract_description(setup_md: Path) -> str:
     """
-    Extrae la descripcion de un setup.md: el primer parrafo bajo '## Que hace',
-    o como fallback la primera linea de texto significativa del archivo.
+    Extrae la descripcion de un setup.md o SKILL.md:
+    - Primer parrafo bajo '## Que hace' o '## What it does'
+    - Fallback: primera linea de texto significativa del archivo
     """
     text = setup_md.read_text(encoding="utf-8")
 
-    # Buscar seccion "## Que hace"
-    match = re.search(r"##\s+Que hace\s*\n(.+?)(?:\n#|\Z)", text, re.DOTALL)
+    # Buscar seccion "## Que hace" o variantes en ingles
+    match = re.search(r"##\s+(?:Que hace|What it does|Overview)\s*\n(.+?)(?:\n#|\Z)", text, re.DOTALL | re.IGNORECASE)
     if match:
         paragraph = match.group(1).strip().splitlines()
         first_line = next((l.strip() for l in paragraph if l.strip()), "")
         if first_line:
             return first_line
 
+    # Buscar linea de descripcion corta bajo el titulo principal
+    lines = text.splitlines()
+    found_title = False
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.startswith("# "):
+            found_title = True
+            continue
+        if found_title and not stripped.startswith("#"):
+            return stripped[:120]
+
     # Fallback: primera linea que no sea un heading
-    for line in text.splitlines():
+    for line in lines:
         stripped = line.strip()
         if stripped and not stripped.startswith("#"):
             return stripped[:120]
 
     return ""
+
+
+def _resolve_setup_md(skill_dir: Path) -> Path | None:
+    """Retorna el path a setup.md, buscando tambien SKILL.md como alias."""
+    for name in ("setup.md", "SKILL.md"):
+        candidate = skill_dir / name
+        if candidate.exists():
+            return candidate
+    return None
 
 
 def _update_namespace_yaml(ns_yaml: Path, skill_name: str, description: str, skill_path_rel: str, roles: list[str]):
@@ -120,6 +146,11 @@ def main():
         help="Copiar desde templates/namespace-skills/<skill>/ (debe existir en el repo)",
     )
     parser.add_argument(
+        "--from-path",
+        metavar="PATH",
+        help="Copiar desde una ruta externa. Acepta SKILL.md o setup.md como instruccion principal.",
+    )
+    parser.add_argument(
         "--roles",
         default="backend,devops",
         help="Roles que pueden instalar la skill, separados por coma (default: backend,devops)",
@@ -146,7 +177,18 @@ def main():
 
     # ── Determinar origen ─────────────────────────────────────────────────────
 
-    if args.from_template:
+    if args.from_path:
+        src_dir = Path(args.from_path).expanduser().resolve()
+        if not src_dir.exists():
+            console.print(f"[red]✗[/]  Ruta '{args.from_path}' no existe")
+            sys.exit(1)
+        if not src_dir.is_dir():
+            console.print(f"[red]✗[/]  '{args.from_path}' debe ser una carpeta, no un archivo")
+            sys.exit(1)
+        if _resolve_setup_md(src_dir) is None:
+            console.print(f"[red]✗[/]  No se encontro setup.md ni SKILL.md en '{args.from_path}'")
+            sys.exit(1)
+    elif args.from_template:
         src_dir = SKILLS_TEMPLATES_DIR / args.skill
         if not src_dir.exists():
             console.print(f"[red]✗[/]  Template '{args.skill}' no encontrado en templates/namespace-skills/")
@@ -169,6 +211,12 @@ def main():
         tpl_content = tpl_setup.read_text(encoding="utf-8").replace("{{SKILL_NAME}}", args.skill)
         final_setup.write_text(tpl_content, encoding="utf-8")
         tpl_setup.unlink()
+
+    # Si se copio desde --from-path y el archivo principal es SKILL.md, renombrarlo
+    skill_md = dest_dir / "SKILL.md"
+    setup_md_path = dest_dir / "setup.md"
+    if skill_md.exists() and not setup_md_path.exists():
+        skill_md.rename(setup_md_path)
 
     # ── Extraer descripcion y actualizar namespace.yaml ───────────────────────
 
