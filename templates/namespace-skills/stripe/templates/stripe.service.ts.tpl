@@ -20,8 +20,8 @@ export class StripeService {
   /**
    * Crea un PaymentIntent en Stripe.
    *
-   * @param amount   Monto en la unidad mínima de la moneda (centavos para USD/EUR).
-   * @param currency Código ISO 4217 de la moneda, en minúsculas. Ej: 'usd', 'eur'.
+   * @param amount   Monto en la unidad minima de la moneda (centavos para USD/EUR).
+   * @param currency Codigo ISO 4217 de la moneda, en minusculas. Ej: 'usd', 'eur'.
    * @param metadata Metadatos opcionales para asociar al PaymentIntent.
    * @returns        El objeto PaymentIntent creado por Stripe.
    * @throws         Error si Stripe rechaza la solicitud.
@@ -70,7 +70,7 @@ export class StripeService {
    *                  usar `@RawBody()` o `express.raw()` en el middleware.
    * @param signature Valor del header `stripe-signature` del request entrante.
    * @returns         El objeto Stripe.Event validado.
-   * @throws          Error si la firma no es válida o el payload está malformado.
+   * @throws          Error si la firma no es valida o el payload esta malformado.
    */
   constructWebhookEvent(
     payload: Buffer | string,
@@ -92,7 +92,7 @@ export class StripeService {
 
   /**
    * Maneja errores de la API de Stripe con mensajes descriptivos.
-   * Lanza siempre una excepción tipada.
+   * Lanza siempre una excepcion tipada.
    */
   private handleStripeError(error: unknown, method: string): never {
     if (error instanceof Stripe.errors.StripeError) {

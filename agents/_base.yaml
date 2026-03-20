@@ -1,8 +1,8 @@
 # Valores por defecto heredados por todos los agentes.
 # Cada agent/*.yaml puede sobreescribir cualquier campo.
 
-model: claude-haiku-4-5-20251001   # modelo económico por defecto
-max_iter: 10                        # máximo de iteraciones por tarea
+model: claude-haiku-4-5-20251001   # modelo economico por defecto
+max_iter: 10                        # maximo de iteraciones por tarea
 verbose: false
 allow_delegation: false             # cada agente solo hace su tarea
 output_format: markdown             # formato de entrega de resultados

@@ -39,7 +39,7 @@ python -m playwright install chromium --quiet 2>/dev/null || \
 echo ""
 echo -e "${GREEN}✓ Setup completo.${NC}"
 echo ""
-echo "Próximos pasos:"
+echo "Proximos pasos:"
 echo "  1. Edita .env con tu ANTHROPIC_API_KEY"
 echo "  2. Crea tu primer namespace:"
 echo "     source .venv/Scripts/activate 2>/dev/null || source .venv/bin/activate"

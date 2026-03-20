@@ -1,8 +1,8 @@
 # Namespace Skills
 
-Una **namespace skill** es una instrucción versionada que cualquier agente puede leer
-para instalar una integración específica (Stripe, Auth0, SendGrid, etc.) en un proyecto
-del namespace. El agente no inventa nada: lee `setup.md` y sabe exactamente qué hacer.
+Una **namespace skill** es una instruccion versionada que cualquier agente puede leer
+para instalar una integracion especifica (Stripe, Auth0, SendGrid, etc.) en un proyecto
+del namespace. El agente no inventa nada: lee `setup.md` y sabe exactamente que hacer.
 
 ---
 
@@ -11,28 +11,28 @@ del namespace. El agente no inventa nada: lee `setup.md` y sabe exactamente qué
 ```
 skill/
 └── stripe/
-    ├── setup.md        ← instrucción (OBLIGATORIO)
+    ├── setup.md        ← instruccion (OBLIGATORIO)
     ├── templates/       ← archivos base listos para copiar (OPCIONAL)
     │   ├── stripe.service.ts.tpl
     │   └── .env.stripe.example
     └── skill.py         ← helpers Python ejecutables (OPCIONAL)
 ```
 
-| Capa | Cuándo usarla |
+| Capa | Cuando usarla |
 |------|---------------|
 | `setup.md` | Siempre. Es lo que el agente lee. Sin esto no hay skill. |
-| `templates/` | Cuando hay archivos que el agente debe copiar al proyecto (servicios, módulos, configs). Los archivos `.tpl` son plantillas que el agente adapta al stack. |
-| `skill.py` | Cuando hay lógica Python que automatizar (ej. generar un secreto, validar una API key, hacer un request de setup). |
+| `templates/` | Cuando hay archivos que el agente debe copiar al proyecto (servicios, modulos, configs). Los archivos `.tpl` son plantillas que el agente adapta al stack. |
+| `skill.py` | Cuando hay logica Python que automatizar (ej. generar un secreto, validar una API key, hacer un request de setup). |
 
 ---
 
-## Cómo crear una skill desde cero
+## Como crear una skill desde cero
 
 ```bash
-# 1. Copiar el template vacío
+# 1. Copiar el template vacio
 python run/add_namespace_skill.py --namespace mi-namespace --skill mi-skill
 
-# 2. Editar la instrucción
+# 2. Editar la instruccion
 nano namespaces/mi-namespace/skills/mi-skill/setup.md
 
 # 3. Agregar templates si aplica
@@ -44,9 +44,9 @@ O desde el repositorio (para contribuir una skill reutilizable):
 ```
 templates/namespace-skills/
 └── mi-skill/
-    ├── setup.md          ← instrucción completa
+    ├── setup.md          ← instruccion completa
     └── templates/
-        └── *.tpl         ← archivos con extensión .tpl
+        └── *.tpl         ← archivos con extension .tpl
 ```
 
 Luego agregar al namespace con:
@@ -57,13 +57,13 @@ python run/add_namespace_skill.py --namespace mi-namespace --skill mi-skill --fr
 
 ---
 
-## Cómo agregar una skill existente a un namespace
+## Como agregar una skill existente a un namespace
 
 ```bash
 # Desde template versionado en este repo:
 python run/add_namespace_skill.py --namespace ecommerce-web --skill stripe --from-template
 
-# Skill vacía para escribir desde cero:
+# Skill vacia para escribir desde cero:
 python run/add_namespace_skill.py --namespace ecommerce-web --skill auth0
 ```
 
@@ -72,25 +72,25 @@ la entrada al `namespace.yaml`.
 
 ---
 
-## Cómo decirle al agente que instale una skill
+## Como decirle al agente que instale una skill
 
 Una vez que el namespace tiene la skill configurada, cualquiera de estas frases funciona:
 
 - `"instala la skill stripe en este proyecto"`
-- `"configura Stripe siguiendo la instrucción del namespace"`
+- `"configura Stripe siguiendo la instruccion del namespace"`
 - `"el proyecto necesita procesar pagos, revisa las skills disponibles"`
-- `"integra Stripe en el módulo de pagos"`
+- `"integra Stripe en el modulo de pagos"`
 
-El agente recibe la instrucción completa de `setup.md` en su contexto y ejecuta
-los pasos listados ahí: verifica variables de entorno, instala dependencias, copia
-templates, adapta el código al stack, verifica que compila.
+El agente recibe la instruccion completa de `setup.md` en su contexto y ejecuta
+los pasos listados ahi: verifica variables de entorno, instala dependencias, copia
+templates, adapta el codigo al stack, verifica que compila.
 
 ---
 
 ## Convenciones para archivos .tpl
 
-- Extensión `.tpl` en todos los archivos de `templates/`
-- El agente elimina la extensión `.tpl` al copiar al proyecto
+- Extension `.tpl` en todos los archivos de `templates/`
+- El agente elimina la extension `.tpl` al copiar al proyecto
 - Usar `{{VARIABLE}}` para placeholders que el agente debe reemplazar
 - El nombre del archivo indica el destino: `stripe.service.ts.tpl` → `stripe.service.ts`
 
@@ -98,9 +98,9 @@ templates, adapta el código al stack, verifica que compila.
 
 ## Skills disponibles en este repo
 
-| Skill | Descripción |
+| Skill | Descripcion |
 |-------|-------------|
-| `stripe` | Integración de pagos con Stripe para NestJS + TypeScript |
+| `stripe` | Integracion de pagos con Stripe para NestJS + TypeScript |
 
 Para contribuir una skill nueva, crea la carpeta en `templates/namespace-skills/`
 siguiendo la estructura del ejemplo `stripe/`.

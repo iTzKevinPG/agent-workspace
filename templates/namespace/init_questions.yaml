@@ -1,16 +1,16 @@
 # Preguntas que hace run/init.py al crear un namespace nuevo.
-# Puedes agregar, quitar o reordenar preguntas aquí.
+# Puedes agregar, quitar o reordenar preguntas aqui.
 
 questions:
 
   - key: name
-    prompt: "Nombre del namespace (slug, sin espacios ni mayúsculas)"
+    prompt: "Nombre del namespace (slug, sin espacios ni mayusculas)"
     type: text
     required: true
     example: "ecommerce-web"
 
   - key: description
-    prompt: "Descripción corta del dominio"
+    prompt: "Descripcion corta del dominio"
     type: text
     required: true
     example: "Ecommerces y landing pages en Next.js + NestJS"
@@ -27,7 +27,7 @@ questions:
     example: "Next.js 14, NestJS, PostgreSQL, TailwindCSS, TypeScript"
 
   - key: methodology
-    prompt: "Metodología de trabajo"
+    prompt: "Metodologia de trabajo"
     type: choice
     options:
       - value: scrum
@@ -35,7 +35,7 @@ questions:
       - value: kanban
         label: "Kanban (flujo continuo)"
       - value: libre
-        label: "Libre / sin metodología formal"
+        label: "Libre / sin metodologia formal"
 
   - key: branching
     prompt: "Estrategia de branching"
@@ -49,7 +49,7 @@ questions:
         label: "Feature branches simples"
 
   - key: commits
-    prompt: "Convención de commits"
+    prompt: "Convencion de commits"
     type: choice
     options:
       - value: conventional
@@ -66,10 +66,10 @@ questions:
   - key: main_restrictions
     prompt: "Restricciones importantes que los agentes deben respetar"
     type: text
-    hint: "Se agrega automáticamente a rules.md. Ej: no push a main, no borrar archivos sin confirmar"
+    hint: "Se agrega automaticamente a rules.md. Ej: no push a main, no borrar archivos sin confirmar"
     required: false
 
   - key: extra_context
-    prompt: "¿Algo más que los agentes deban saber sobre este entorno? (opcional)"
+    prompt: "Algo mas que los agentes deban saber sobre este entorno? (opcional)"
     type: text
     required: false
