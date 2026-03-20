@@ -101,7 +101,7 @@ def validate_namespace(name: str) -> bool:
         # Validar projects_path del namespace y MCPs activos
         try:
             import yaml as _yaml
-            data = _yaml.safe_load((ns_dir / "namespace.yaml").read_text())
+            data = _yaml.safe_load((ns_dir / "namespace.yaml").read_text(encoding="utf-8"))
             pp = Path(data.get("projects_path", ""))
             check("projects_path existe en disco", pp.exists(),
                   str(pp) if not pp.exists() else "")

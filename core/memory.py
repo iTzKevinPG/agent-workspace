@@ -74,4 +74,4 @@ class SessionMemory:
             "tasks": [t.__dict__ for t in self.tasks],
             "decisions": self.decisions,
         }
-        path.write_text(json.dumps(data, indent=2, ensure_ascii=False))
+        path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")

@@ -1,6 +1,6 @@
 name: architect
 role: "Solution Architect"
-model: claude-sonnet-4-6   # decisiones complejas -> modelo mas capaz
+model: claude-haiku-4-5
 
 goal: |
   Analizar requerimientos, proponer la arquitectura mas simple que resuelva

@@ -100,10 +100,16 @@ def _alerts_panel(state: DashboardState) -> Panel | None:
 
 
 def _footer(state: DashboardState) -> Text:
+    from core.logger import get_total_cost, get_total_tokens
+    total_cost = get_total_cost() + state.cost_today
+    total_tokens = get_total_tokens() + state.tokens_today
+
     t = Text(justify="left", style="dim")
-    t.append(f"  tokens: {state.tokens_today:,}  ·  ")
-    t.append(f"costo: ${state.cost_today:.4f}  ·  ")
-    t.append(f"sesion: {state.session_elapsed}")
+    t.append(f"  sesion: {state.tokens_today:,} tok  ${state.cost_today:.4f}")
+    t.append("  |  ", style="dim")
+    t.append("total: ", style="dim")
+    t.append(f"{total_tokens:,} tok  ${total_cost:.4f}", style="bold yellow" if total_cost > 0.5 else "dim")
+    t.append(f"  |  {state.session_elapsed}")
     t.append("      ")
     t.append("[q]", style="bold white")
     t.append(" salir  ")
@@ -183,6 +189,18 @@ class Dashboard:
         self._live: Live | None = None
 
     def __enter__(self):
+        import logging
+        from pathlib import Path
+
+        # Redirigir logs al archivo para no contaminar el Live display
+        Path("logs").mkdir(exist_ok=True)
+        self._file_handler = logging.FileHandler("logs/session.log", encoding="utf-8")
+        self._file_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
+        self._old_handlers = logging.root.handlers[:]
+        self._old_level = logging.root.level
+        logging.root.handlers = [self._file_handler]
+        logging.root.setLevel(logging.DEBUG)
+
         self._live = Live(
             build_layout(self.state),
             console=console,
@@ -195,10 +213,26 @@ class Dashboard:
     def __exit__(self, *args):
         if self._live:
             self._live.__exit__(*args)
+        import logging
+        logging.root.handlers = self._old_handlers
+        logging.root.setLevel(self._old_level)
+        if hasattr(self, "_file_handler"):
+            self._file_handler.close()
 
     def refresh(self):
         if self._live:
             self._live.update(build_layout(self.state))
+
+    def get_input(self, prompt: str = "") -> str:
+        """Pausa el Live, obtiene input del usuario y reanuda el display."""
+        if self._live:
+            self._live.stop()
+        try:
+            return input(prompt)
+        finally:
+            if self._live:
+                self._live.start()
+                self._live.update(build_layout(self.state))
 
     def print_final(self):
         """Imprime el estado final una vez cerrado el Live."""

@@ -7,7 +7,10 @@ Orquestador principal.
 """
 from __future__ import annotations
 
+import logging
 import os
+import threading
+import time
 import uuid
 from pathlib import Path
 
@@ -45,6 +48,9 @@ class Orchestrator:
         # Poblar skills en el dashboard
         self.state.namespace_skills = [s.name for s in self.ns.namespace_skills]
 
+        # Flag para solicitar skip de tareas pendientes
+        self._skip_event = threading.Event()
+
     # ─── Sesion interactiva ──────────────────────────────────────────
 
     def interactive_session(self):
@@ -52,13 +58,11 @@ class Orchestrator:
         Loop principal: arranca el dashboard y espera tareas del usuario.
         El orquestador se mantiene encendido hasta que el usuario escriba 'salir'.
         """
-        print_welcome(self.ns.name, self.project_name)
-
         with Dashboard(self.state) as dash:
             while True:
                 dash.refresh()
                 try:
-                    raw = input("\n  tarea > ").strip()
+                    raw = dash.get_input("\n  tarea > ").strip()
                 except (KeyboardInterrupt, EOFError):
                     break
 
@@ -78,10 +82,32 @@ class Orchestrator:
                     dash.refresh()
                     continue
 
-                # Ejecutar la tarea
+                # Ejecutar la tarea en hilo de fondo; hilo principal refresca el display
                 self.state.current_task_description = raw
+                self._skip_event.clear()
                 dash.refresh()
-                self._run_task(raw, dash)
+
+                task_error: list[Exception | None] = [None]
+                task_done = threading.Event()
+
+                def _run():
+                    try:
+                        self._run_task(raw)
+                    except Exception as e:
+                        task_error[0] = e
+                    finally:
+                        task_done.set()
+
+                threading.Thread(target=_run, daemon=True).start()
+
+                while not task_done.wait(timeout=0.3):
+                    dash.refresh()
+                    if self._read_skip_key():
+                        self._skip_event.set()
+                        self.state.current_task_description = raw + "  [skip →]"
+
+                if task_error[0]:
+                    self._handle_task_error(task_error[0], dash)
 
                 # Actualizar metricas
                 metrics = self.logger.summary()
@@ -92,15 +118,17 @@ class Orchestrator:
                 )
                 dash.refresh()
 
+        self.logger.log_session_end()
         print_info("Sesion terminada.")
         self.logger.summary()
 
     # ─── Ejecucion de una tarea ──────────────────────────────────────
 
-    def _run_task(self, task_description: str, dash: Dashboard | None = None):
+    def _run_task(self, task_description: str):
         """
         Planifica y ejecuta una tarea usando el Crew de agentes.
         Primero el arquitecto analiza, luego delega a los agentes correctos.
+        Se ejecuta en un hilo de fondo; solo actualiza el estado (self.state).
         """
         # 1. Planificacion inicial con el arquitecto (si esta activo)
         plan = self._plan_task(task_description)
@@ -111,14 +139,14 @@ class Orchestrator:
             tid = str(uuid.uuid4())[:8]
             self.state.add_task(tid, step["description"], step["agent"])
             task_ids.append((tid, step))
-            if dash:
-                dash.refresh()
 
         # 3. Ejecutar cada paso del plan
         for tid, step in task_ids:
+            if self._skip_event.is_set():
+                self.state.skip_task(tid)
+                continue
+
             self.state.start_task(tid)
-            if dash:
-                dash.refresh()
 
             try:
                 result = self._execute_step(step, task_description)
@@ -126,6 +154,13 @@ class Orchestrator:
                 self._write_tool.modified_files.clear()
 
                 self.state.complete_task(tid, files=files, summary=result[:200])
+                self.logger.log_agent_output(
+                    agent=step["agent"],
+                    task=step["description"],
+                    output=result,
+                    files=files,
+                    status="done",
+                )
                 self.memory.add_task(TaskMemory(
                     task=step["description"],
                     agent=step["agent"],
@@ -137,6 +172,13 @@ class Orchestrator:
             except Exception as e:
                 error_msg = str(e)
                 self.state.fail_task(tid, alert=error_msg[:120])
+                self.logger.log_agent_output(
+                    agent=step["agent"],
+                    task=step["description"],
+                    output=error_msg,
+                    files=[],
+                    status="failed",
+                )
                 self.memory.add_task(TaskMemory(
                     task=step["description"],
                     agent=step["agent"],
@@ -144,26 +186,31 @@ class Orchestrator:
                     summary=error_msg,
                 ))
 
-            if dash:
-                dash.refresh()
 
     # ─── Planificacion ───────────────────────────────────────────────
 
+    _SINGLE_AGENT_KEYWORDS = (
+        "lee ", "leer ", "revisa ", "revisar ", "analiza ", "analizar ",
+        "muestra ", "mostrar ", "explica ", "explicar ", "busca ", "buscar ",
+        "lista ", "listar ", "describe ", "describir ", "resume ", "resumir ",
+    )
+
     def _plan_task(self, task_description: str) -> list[dict]:
         """
-        El arquitecto (o el orquestador si no hay arquitecto) divide
-        la tarea en pasos asignados a agentes especificos.
+        El arquitecto divide la tarea en pasos.
+        Para tareas de lectura/analisis simples, asigna directamente sin
+        llamar al arquitecto para ahorrar tokens.
         """
         architect_cfg = next(
             (a for a in self.agent_configs if a.name == "architect"), None
         )
 
-        if not architect_cfg:
-            # Sin arquitecto: asignar al primer agente disponible
-            first = self.agent_configs[0] if self.agent_configs else None
-            if not first:
-                return []
-            return [{"agent": first.name, "description": task_description}]
+        # Deteccion rapida: tareas que claramente son de un solo agente
+        task_lower = task_description.lower().strip()
+        is_simple = any(task_lower.startswith(kw) for kw in self._SINGLE_AGENT_KEYWORDS)
+        if is_simple or not architect_cfg:
+            target = self._guess_agent(task_description)
+            return [{"agent": target, "description": task_description}]
 
         # Usar el arquitecto para planificar
         architect = self._build_crewai_agent(architect_cfg)
@@ -193,6 +240,19 @@ Maximo 5 pasos. Sin texto adicional.
 
         crew = Crew(agents=[architect], tasks=[plan_task], verbose=False)
         result = crew.kickoff()
+
+        try:
+            usage = result.token_usage
+            if usage:
+                self.logger.log_llm_call(
+                    model=architect_cfg.model,
+                    input_tokens=getattr(usage, "prompt_tokens", 0) or getattr(usage, "input_tokens", 0),
+                    output_tokens=getattr(usage, "completion_tokens", 0) or getattr(usage, "output_tokens", 0),
+                    agent="architect",
+                    task=f"plan: {task_description[:60]}",
+                )
+        except Exception:
+            pass
 
         return self._parse_plan(str(result))
 
@@ -226,7 +286,31 @@ Maximo 5 pasos. Sin texto adicional.
 
     # ─── Ejecucion de paso ───────────────────────────────────────────
 
+    _RATE_LIMIT_SIGNALS = ("429", "too many requests", "rate limit", "invalid response from llm call")
+    _RETRY_WAITS = [30, 60, 120]  # segundos entre reintentos
+
+    @staticmethod
+    def _is_rate_limit_error(exc: Exception) -> bool:
+        msg = str(exc).lower()
+        return any(sig in msg for sig in Orchestrator._RATE_LIMIT_SIGNALS)
+
     def _execute_step(self, step: dict, original_task: str) -> str:
+        log = logging.getLogger("agent-workspace")
+        for attempt, wait in enumerate([0] + Orchestrator._RETRY_WAITS):
+            if wait:
+                log.warning(
+                    f"[retry {attempt}/{len(Orchestrator._RETRY_WAITS)}] "
+                    f"agente '{step['agent']}' — esperando {wait}s antes de reintentar..."
+                )
+                time.sleep(wait)
+            try:
+                return self._call_crew(step, original_task)
+            except Exception as e:
+                if self._is_rate_limit_error(e) and attempt < len(Orchestrator._RETRY_WAITS):
+                    continue
+                raise
+
+    def _call_crew(self, step: dict, original_task: str) -> str:
         agent_name = step["agent"]
         agent_cfg = next((a for a in self.agent_configs if a.name == agent_name), None)
         if not agent_cfg:
@@ -237,25 +321,19 @@ Maximo 5 pasos. Sin texto adicional.
         description = f"""
 {step['description']}
 
-Contexto completo:
-- Tarea original: {original_task}
-- Namespace: {self.ns.name} — {self.ns.description}
+Contexto:
+- Tarea: {original_task[:200]}
 - Stack: {', '.join(self.ns.stack)}
-- Proyecto activo: {self.project_root}
-- Metodologia: {self.ns.methodology}
+- Proyecto: {self.project_root}
 - Historial: {self.memory.summary_for_agents()}
 
-Estandares a seguir:
-{self.ns.standards[:800] if self.ns.standards else '(sin estandares definidos aun)'}
+Estandares (fragmento):
+{self.ns.standards[:400] if self.ns.standards else '(sin estandares)'}
 
-Reglas:
-{self.ns.rules[:600] if self.ns.rules else '(sin reglas definidas aun)'}
+Reglas (fragmento):
+{self.ns.rules[:300] if self.ns.rules else '(sin reglas)'}
 
-Instrucciones:
-- Usa las herramientas disponibles para leer archivos existentes antes de escribir
-- Sigue los estandares del namespace
-- Si encuentras algo que bloquea la tarea, describelo claramente
-- Al terminar, resume que hiciste en 2-3 lineas
+- Lee archivos antes de modificar. Resume en 2-3 lineas al terminar.
 """
         skills_ctx = self._namespace_skills_context(agent_cfg.name)
         if skills_ctx:
@@ -275,6 +353,21 @@ Instrucciones:
         )
 
         result = crew.kickoff()
+
+        # Registrar tokens reales del resultado
+        try:
+            usage = result.token_usage
+            if usage:
+                self.logger.log_llm_call(
+                    model=agent_cfg.model,
+                    input_tokens=getattr(usage, "prompt_tokens", 0) or getattr(usage, "input_tokens", 0),
+                    output_tokens=getattr(usage, "completion_tokens", 0) or getattr(usage, "output_tokens", 0),
+                    agent=agent_name,
+                    task=step.get("description", "")[:80],
+                )
+        except Exception:
+            pass
+
         return str(result)
 
     # ─── Construccion de agentes CrewAI ─────────────────────────────
@@ -345,11 +438,63 @@ Instrucciones:
             "Para instalar una skill, lee su instruccion completa y sigue los pasos.\n"
         )
         for s in skills:
-            lines.append(f"### {s.name}")
-            lines.append(f"{s.description}")
-            lines.append(f"Instruccion completa:\n{s.instruction}\n")
+            lines.append(f"- **{s.name}**: {s.description}")
+            lines.append(f"  Instruccion en: {s.path / 'setup.md'}")
 
+        lines.append(
+            "\nAntes de aplicar una skill, lee su setup.md con la herramienta de lectura de archivos."
+        )
         return "\n".join(lines)
+
+    def _guess_agent(self, task_description: str) -> str:
+        """Elige el agente mas probable sin llamar al LLM."""
+        task_lower = task_description.lower()
+        names = {a.name for a in self.agent_configs}
+        if "frontend" in names and any(w in task_lower for w in ("front", "react", "componente", "ui", "css", "tsx", "jsx", "page", "vista")):
+            return "frontend"
+        if "backend" in names and any(w in task_lower for w in ("back", "api", "endpoint", "service", "controller", "dto", "entity", "migration", "c#", ".net")):
+            return "backend"
+        if "qa" in names and any(w in task_lower for w in ("test", "prueba", "spec", "e2e", "playwright")):
+            return "qa"
+        # fallback: primer agente no-arquitecto
+        return next((a.name for a in self.agent_configs if a.name != "architect"), self.agent_configs[0].name)
+
+    # ─── Skip de tareas ──────────────────────────────────────────────
+
+    @staticmethod
+    def _read_skip_key() -> bool:
+        """Devuelve True si el usuario presiono 's' o 'S'. No bloquea."""
+        try:
+            import msvcrt  # Windows
+            if msvcrt.kbhit():
+                ch = msvcrt.getch()
+                return ch in (b"s", b"S")
+        except ImportError:
+            import select, sys, tty, termios
+            if select.select([sys.stdin], [], [], 0)[0]:
+                fd = sys.stdin.fileno()
+                old = termios.tcgetattr(fd)
+                try:
+                    tty.setraw(fd)
+                    return sys.stdin.read(1).lower() == "s"
+                finally:
+                    termios.tcsetattr(fd, termios.TCSADRAIN, old)
+        return False
+
+    # ─── Manejo de errores ───────────────────────────────────────────
+
+    def _handle_task_error(self, error: Exception, dash: "Dashboard"):
+        """Muestra errores de tarea de forma limpia sin crashear la sesion."""
+        from anthropic import AuthenticationError
+
+        if isinstance(error, AuthenticationError):
+            msg = "API key invalida. Edita .env y agrega tu ANTHROPIC_API_KEY real."
+        else:
+            msg = str(error)[:200]
+
+        print_error(msg)
+        self.state.current_task_description = f"[error] {msg[:80]}"
+        dash.refresh()
 
     # ─── Cambio de proyecto ──────────────────────────────────────────
 

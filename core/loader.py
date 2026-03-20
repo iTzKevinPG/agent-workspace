@@ -87,7 +87,7 @@ def load_agent(name: str) -> AgentConfig:
         role=merged["role"],
         goal=merged["goal"].strip(),
         backstory=merged["backstory"].strip(),
-        model=merged.get("model", os.getenv("ANTHROPIC_MODEL", "claude-haiku-4-5-20251001")),
+        model=merged.get("model", os.getenv("ANTHROPIC_MODEL", "claude-haiku-4-5")),
         skills=merged.get("skills", []),
         mcps=merged.get("mcps", []),
         responsibilities=merged.get("responsibilities", []),
@@ -172,7 +172,7 @@ def load_namespace_skills(ns_dir: Path, skills_config: list) -> list[NamespaceSk
             roles=entry.get("roles", []),
             has_templates=(skill_dir / "templates").is_dir(),
             has_python=(skill_dir / "skill.py").exists(),
-            instruction=setup_md.read_text(encoding="utf-8"),
+            instruction="",  # se lee bajo demanda, no al arrancar
         ))
     return skills
 

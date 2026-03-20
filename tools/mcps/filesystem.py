@@ -89,7 +89,7 @@ class ListDirTool(BaseTool):
 
         entries = []
         for entry in sorted(target.iterdir()):
-            prefix = "📁 " if entry.is_dir() else "   "
+            prefix = "[dir] " if entry.is_dir() else "      "
             entries.append(f"{prefix}{entry.name}")
 
         return "\n".join(entries) if entries else "(directorio vacio)"
